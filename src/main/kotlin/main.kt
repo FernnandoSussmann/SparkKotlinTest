@@ -8,7 +8,11 @@ import org.apache.spark.sql.*
 import org.apache.spark.sql.types.DataTypes
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.functions.sum
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.functions.callUDF
 import sparkKotlinTest.model.DummyDataClass
+import org.apache.spark.sql.expressions.UserDefinedFunction
+import org.apache.spark.sql.api.java.UDF1
 
 
 fun main(args : Array<String>) {
@@ -85,9 +89,17 @@ fun main(args : Array<String>) {
         )
     )
 
+    df4.cache()
     df4.show(100)
 
     df4.select(sum("number")).show()
+
+    //val higherThan50 = udf({ i: Int -> i > 50 }, DataTypes.IntegerType)
+    val higherThan50 = UDF1<Int, Boolean>{ i: Int -> i > 50 }
+
+    spark.udf().register("higherThan50", higherThan50,  DataTypes.BooleanType)
+
+    df4.select(callUDF("higherThan50", df4.col("number"))).show(100)
 
 }
 
