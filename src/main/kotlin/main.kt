@@ -1,4 +1,6 @@
-package SparkKotlinTest
+@file:JvmName("Main")
+
+package sparkKotlinTest
 
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.JavaSparkContext
@@ -6,11 +8,10 @@ import org.apache.spark.sql.*
 import org.apache.spark.sql.types.DataTypes
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.functions.sum
-import java.util.ArrayList
-import SparkKotlinTest.model.DummyDataClass
+import sparkKotlinTest.model.DummyDataClass
 
 
-fun  main() {
+fun main(args : Array<String>) {
     val spark = SparkSession
         .builder()
         .appName("Build a DataFrame from Scratch")
@@ -21,13 +22,16 @@ fun  main() {
 
     val sparkContext = JavaSparkContext(spark.sparkContext())
 
-    val rowRDD: JavaRDD<Row> = sparkContext.parallelize(stringAsList).map{ row: Array<String> -> RowFactory.create(*row)}
+    val rowRDD: JavaRDD<Row> =
+        sparkContext.parallelize(stringAsList).map { row: Array<String> -> RowFactory.create(*row) }
 
     val schema: StructType = DataTypes
-                    .createStructType(
-                        arrayOf(
-                            DataTypes.createStructField("foe1", DataTypes.StringType, false),
-                            DataTypes.createStructField("foe2", DataTypes.StringType, false)))
+        .createStructType(
+            arrayOf(
+                DataTypes.createStructField("foe1", DataTypes.StringType, false),
+                DataTypes.createStructField("foe2", DataTypes.StringType, false)
+            )
+        )
 
     val df = spark.createDataFrame(rowRDD, schema).toDF()
 
@@ -37,9 +41,11 @@ fun  main() {
         sparkContext.parallelize(arrayListOf(RowFactory.create(1, "test"))),
         DataTypes.createStructType(
             arrayOf(
-                DataTypes.createStructField("id", DataTypes.IntegerType, false ),
-                DataTypes.createStructField("desc", DataTypes.StringType, false )
-            )))
+                DataTypes.createStructField("id", DataTypes.IntegerType, false),
+                DataTypes.createStructField("desc", DataTypes.StringType, false)
+            )
+        )
+    )
 
     df2.show()
 
@@ -67,18 +73,21 @@ fun  main() {
 
     val listOfIntegers = IntRange(1, 100).toList()
 
-    val rowRDDOfIntegers = sparkContext.parallelize(listOfIntegers).map{row: Int -> RowFactory.create(row)}
+    val rowRDDOfIntegers = sparkContext.parallelize(listOfIntegers).map { row: Int -> RowFactory.create(row) }
 
 
     val df4 = spark.createDataFrame(
         rowRDDOfIntegers,
         DataTypes.createStructType(
             arrayOf(
-                DataTypes.createStructField("number", DataTypes.IntegerType, false )
-            )))
+                DataTypes.createStructField("number", DataTypes.IntegerType, false)
+            )
+        )
+    )
 
     df4.show(100)
 
     df4.select(sum("number")).show()
 
 }
+
